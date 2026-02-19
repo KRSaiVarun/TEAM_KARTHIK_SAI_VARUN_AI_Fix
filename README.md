@@ -20,25 +20,59 @@ A full-stack application that analyzes GitHub repositories, detects bugs (Lintin
 ## Setup Instructions
 
 1.  **Install Dependencies**:
+
     ```bash
     npm install
     ```
+
     Python dependencies are installed via `nix` or `pip`:
+
     ```bash
     pip install fastapi uvicorn pydantic gitpython pytest psycopg2-binary
     ```
 
 2.  **Database Setup**:
     Ensure PostgreSQL is running and `DATABASE_URL` is set.
+
     ```bash
     npm run db:push
     ```
 
 3.  **Run Application**:
+
     ```bash
     npm run dev
     ```
+
     This starts the Node.js server (port 5000) and the React frontend.
+
+4.  **(Optional) Seed Demo Data**:
+    ```bash
+    npm run seed
+    ```
+    Creates a demo project for testing the Score Breakdown Panel and Fixes Table.
+
+## Quick Start - Using the Dashboard
+
+1. **Open Dashboard**: http://localhost:5000
+2. **Fill Out Form**:
+   - GitHub Repository URL: `https://github.com/user/repo`
+   - Team Name: `My Team`
+   - Leader Name: `Alice Johnson`
+3. **Click "Run Analysis"** - Analysis starts in background
+4. **View Results**: Click on project to see Project Details page
+5. **Check Status**:
+   - Shows: `PENDING` → `RUNNING` → `COMPLETED`
+   - Displays your team name and leader name
+   - Real-time logs of what the agent is doing
+
+## Important Notes
+
+✅ **Your Data is Displayed**: Whatever you enter in the form (Team Name, Leader Name) will show on the Project Details page, not demo data!
+
+✅ **Demo Project**: ID 3 is a demo project created by `npm run seed` for testing
+
+✅ **Real Projects**: Any project you create via the dashboard form will show YOUR submitted data
 
 ## API Endpoints
 
