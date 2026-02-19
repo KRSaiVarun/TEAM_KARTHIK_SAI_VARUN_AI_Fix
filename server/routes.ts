@@ -1,29 +1,39 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
 import { api } from "@shared/routes";
-import { z } from "zod";
 import { spawn } from "child_process";
+import type { Express } from "express";
+import { type Server } from "http";
 import path from "path";
+import { z } from "zod";
+import { storage } from "./storage";
 
 export async function registerRoutes(
   httpServer: Server,
-  app: Express
+  app: Express,
 ): Promise<Server> {
-
   app.post(api.projects.create.path, async (req, res) => {
     try {
       const input = api.projects.create.input.parse(req.body);
       const project = await storage.createProject(input);
 
-      // Trigger Python agent in background
-      const pythonProcess = spawn("python3", [
-        path.join(process.cwd(), "backend", "agent.py"),
-        project.id.toString(),
-        project.repoUrl,
-        project.teamName,
-        project.leaderName
-      ]);
+      // Trigger Python agent in background with environment variables
+      const pythonProcess = spawn(
+        "python",
+        [
+          path.join(process.cwd(), "backend", "agent.py"),
+          project.id.toString(),
+          project.repoUrl,
+          project.teamName,
+          project.leaderName,
+        ],
+        {
+          env: {
+            ...process.env,
+            DATABASE_URL:
+              process.env.DATABASE_URL ||
+              "postgresql://devuser:devpassword@127.0.0.1:15432/devdb",
+          },
+        },
+      );
 
       pythonProcess.stdout.on("data", (data) => {
         console.log(`Agent stdout: ${data}`);
@@ -39,13 +49,16 @@ export async function registerRoutes(
 
       res.status(201).json(project);
     } catch (err) {
+      console.error("POST /api/projects error:", err);
       if (err instanceof z.ZodError) {
         res.status(400).json({
           message: err.errors[0].message,
-          field: err.errors[0].path.join('.'),
+          field: err.errors[0].path.join("."),
         });
       } else {
-        res.status(500).json({ message: "Internal Server Error" });
+        res
+          .status(500)
+          .json({ message: "Internal Server Error", error: String(err) });
       }
     }
   });

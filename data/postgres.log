@@ -1,0 +1,64 @@
+2026-02-19 22:49:23.642 IST [57156] LOG:  starting PostgreSQL 17.4 on x86_64-windows, compiled by msvc-19.42.34436, 64-bit
+2026-02-19 22:49:23.645 IST [57156] LOG:  could not bind IPv6 address "::1": Permission denied
+2026-02-19 22:49:23.645 IST [57156] LOG:  could not bind IPv4 address "127.0.0.1": Permission denied
+2026-02-19 22:49:23.645 IST [57156] WARNING:  could not create listen socket for "localhost"
+2026-02-19 22:49:23.646 IST [57156] FATAL:  could not create any TCP/IP sockets
+2026-02-19 22:49:23.647 IST [57156] LOG:  database system is shut down
+2026-02-19 22:50:59.090 IST [20812] LOG:  starting PostgreSQL 17.4 on x86_64-windows, compiled by msvc-19.42.34436, 64-bit
+2026-02-19 22:50:59.092 IST [20812] LOG:  listening on IPv4 address "127.0.0.1", port 15432
+2026-02-19 22:50:59.137 IST [9352] LOG:  database system was shut down at 2026-02-19 22:49:09 IST
+2026-02-19 22:50:59.157 IST [20812] LOG:  database system is ready to accept connections
+2026-02-19 22:51:08.186 IST [27684] FATAL:  database "devuser" does not exist
+2026-02-19 22:51:51.654 IST [3224] ERROR:  database "devdb" already exists
+2026-02-19 22:51:51.654 IST [3224] STATEMENT:  CREATE DATABASE devdb;
+2026-02-19 22:51:57.589 IST [8216] ERROR:  database "devdb" already exists
+2026-02-19 22:51:57.589 IST [8216] STATEMENT:  CREATE DATABASE devdb;
+2026-02-19 22:54:23.931 IST [51568] ERROR:  database "devdb" already exists
+2026-02-19 22:54:23.931 IST [51568] STATEMENT:  CREATE DATABASE devdb;
+2026-02-19 22:55:23.149 IST [57484] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-02-19 22:55:59.142 IST [46332] LOG:  checkpoint starting: time
+2026-02-19 22:57:50.629 IST [46332] LOG:  checkpoint complete: wrote 1022 buffers (6.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=111.396 s, sync=0.083 s, total=111.487 s; sync files=325, longest=0.003 s, average=0.001 s; distance=4898 kB, estimate=4898 kB; lsn=0/1A3AC28, redo lsn=0/1A3AB98
+2026-02-19 22:57:57.543 IST [55200] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-02-19 22:59:23.176 IST [29108] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-02-19 23:00:59.651 IST [46332] LOG:  checkpoint starting: time
+2026-02-19 23:01:01.182 IST [46332] LOG:  checkpoint complete: wrote 14 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.522 s, sync=0.003 s, total=1.532 s; sync files=8, longest=0.001 s, average=0.001 s; distance=15 kB, estimate=4409 kB; lsn=0/1A3EB40, redo lsn=0/1A3EAB0
+2026-02-19 23:25:59.229 IST [46332] LOG:  checkpoint starting: time
+2026-02-19 23:25:59.686 IST [46332] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.445 s, sync=0.003 s, total=0.458 s; sync files=4, longest=0.001 s, average=0.001 s; distance=1 kB, estimate=3968 kB; lsn=0/1A3F048, redo lsn=0/1A3EFF0
+2026-02-19 23:26:49.658 IST [8952] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-02-19 23:50:59.705 IST [46332] LOG:  checkpoint starting: time
+2026-02-19 23:51:00.049 IST [46332] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.332 s, sync=0.003 s, total=0.347 s; sync files=4, longest=0.001 s, average=0.001 s; distance=1 kB, estimate=3572 kB; lsn=0/1A3F790, redo lsn=0/1A3F738
+2026-02-19 23:55:29.953 IST [20812] LOG:  could not reserve shared memory region (addr=0000017ABC6E0000) for child 000000000000144C: error code 487
+2026-02-19 23:55:59.055 IST [46332] LOG:  checkpoint starting: time
+2026-02-19 23:55:59.388 IST [46332] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.322 s, sync=0.003 s, total=0.334 s; sync files=4, longest=0.002 s, average=0.001 s; distance=2 kB, estimate=3215 kB; lsn=0/1A40150, redo lsn=0/1A400F8
+2026-02-20 00:20:59.430 IST [46332] LOG:  checkpoint starting: time
+2026-02-20 00:20:59.774 IST [46332] LOG:  checkpoint complete: wrote 4 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.332 s, sync=0.005 s, total=0.347 s; sync files=4, longest=0.003 s, average=0.002 s; distance=2 kB, estimate=2894 kB; lsn=0/1A40D10, redo lsn=0/1A40CB8
+2026-02-20 00:37:29.606 IST [19504] FATAL:  database "devdb " does not exist
+2026-02-20 00:39:42.357 IST [13388] FATAL:  database "devdb " does not exist
+2026-02-20 00:46:00.916 IST [46332] LOG:  checkpoint starting: time
+2026-02-20 00:46:22.232 IST [46332] LOG:  checkpoint complete: wrote 199 buffers (1.2%); 1 WAL file(s) added, 0 removed, 0 recycled; write=21.221 s, sync=0.007 s, total=21.317 s; sync files=18, longest=0.001 s, average=0.001 s; distance=2349 kB, estimate=2839 kB; lsn=0/1C8C2B8, redo lsn=0/1C8C228
+2026-02-20 01:05:32.861 IST [2060] ERROR:  syntax error at or near "\" at character 35
+2026-02-20 01:05:32.861 IST [2060] STATEMENT:  SELECT * FROM projects WHERE id=5 \gx
+2026-02-20 01:05:39.937 IST [52116] ERROR:  column "updated_at" does not exist at character 91
+2026-02-20 01:05:39.937 IST [52116] HINT:  Perhaps you meant to reference the column "projects.created_at".
+2026-02-20 01:05:39.937 IST [52116] STATEMENT:  SELECT id, repo_url, status, COALESCE(summary::text, 'NULL') as summary_text, created_at, updated_at FROM projects WHERE id=5;
+2026-02-20 01:07:48.199 IST [20184] ERROR:  column reference "id" is ambiguous at character 8
+2026-02-20 01:07:48.199 IST [20184] STATEMENT:  SELECT id, status, COUNT(bugs.id) as bug_count FROM projects LEFT JOIN bugs ON bugs.project_id=projects.id WHERE projects.id=6 GROUP BY projects.id, projects.status;
+2026-02-20 01:11:00.277 IST [46332] LOG:  checkpoint starting: time
+2026-02-20 01:11:01.943 IST [46332] LOG:  checkpoint complete: wrote 16 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.647 s, sync=0.005 s, total=1.668 s; sync files=8, longest=0.001 s, average=0.001 s; distance=12 kB, estimate=2556 kB; lsn=0/1C8F538, redo lsn=0/1C8F4E0
+2026-02-20 01:16:00.952 IST [46332] LOG:  checkpoint starting: time
+2026-02-20 01:16:02.712 IST [46332] LOG:  checkpoint complete: wrote 17 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.749 s, sync=0.004 s, total=1.760 s; sync files=8, longest=0.001 s, average=0.001 s; distance=119 kB, estimate=2313 kB; lsn=0/1CAD378, redo lsn=0/1CAD320
+2026-02-20 01:21:00.712 IST [46332] LOG:  checkpoint starting: time
+2026-02-20 01:21:02.348 IST [46332] LOG:  checkpoint complete: wrote 16 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.624 s, sync=0.004 s, total=1.636 s; sync files=7, longest=0.001 s, average=0.001 s; distance=7 kB, estimate=2082 kB; lsn=0/1CAEFA8, redo lsn=0/1CAEF50
+2026-02-20 01:26:00.356 IST [46332] LOG:  checkpoint starting: time
+2026-02-20 01:26:02.338 IST [46332] LOG:  checkpoint complete: wrote 19 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=1.967 s, sync=0.006 s, total=1.982 s; sync files=14, longest=0.001 s, average=0.001 s; distance=71 kB, estimate=1881 kB; lsn=0/1CC0E90, redo lsn=0/1CC0E38
+2026-02-20 01:31:00.348 IST [46332] LOG:  checkpoint starting: time
+2026-02-20 01:31:01.115 IST [46332] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.754 s, sync=0.005 s, total=0.768 s; sync files=7, longest=0.002 s, average=0.001 s; distance=27 kB, estimate=1696 kB; lsn=0/1CC7B78, redo lsn=0/1CC7B20
+2026-02-20 02:16:53.069 IST [20812] LOG:  could not reserve shared memory region (addr=0000017ABC6E0000) for child 00000000000012AC: error code 487
+2026-02-20 02:30:42.382 IST [20812] LOG:  background worker "logical replication launcher" (PID 36572) was terminated by exception 0xC000013A
+2026-02-20 02:30:42.382 IST [20812] HINT:  See C include file "ntstatus.h" for a description of the hexadecimal value.
+2026-02-20 02:30:42.383 IST [20812] LOG:  terminating any other active server processes
+^C
