@@ -1,0 +1,115 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --bg: #0a0c10;
+  --surface: #111318;
+  --surface-hover: #161922;
+  --border: #1e2230;
+  --accent-green: #00e5a0;
+  --accent-orange: #ff6b35;
+  --accent-purple: #7c6dfa;
+  --text: #e8eaf0;
+  --muted-color: #5a6080;
+  --warn: #f0b429;
+
+  --background: #0a0c10;
+  --foreground: #e8eaf0;
+  --card: #111318;
+  --card-foreground: #e8eaf0;
+  --popover: #111318;
+  --popover-foreground: #e8eaf0;
+  --primary: #00e5a0;
+  --primary-foreground: #0a0c10;
+  --secondary: #1e2230;
+  --secondary-foreground: #e8eaf0;
+  --muted: #1e2230;
+  --muted-foreground: #5a6080;
+  --accent: #1e2230;
+  --accent-foreground: #e8eaf0;
+  --destructive: #ff6b35;
+  --destructive-foreground: #0a0c10;
+  --border-color: #1e2230;
+  --input: #1e2230;
+  --ring: #00e5a0;
+  --radius: 0.25rem;
+}
+
+@theme inline {
+  --font-sans: var(--font-syne), 'Syne', sans-serif;
+  --font-mono: var(--font-space-mono), 'Space Mono', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border-color);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-accent-green: var(--accent-green);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-purple: var(--accent-purple);
+  --color-text: var(--text);
+  --color-muted-color: var(--muted-color);
+  --color-warn: var(--warn);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-bg text-text;
+  }
+}
+
+/* Custom range slider for budget */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--border);
+  border-radius: 4px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
