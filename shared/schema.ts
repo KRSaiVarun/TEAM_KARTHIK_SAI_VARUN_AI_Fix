@@ -1,10 +1,20 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import {
+    integer,
+    jsonb,
+    pgTable,
+    serial,
+    text,
+    timestamp,
+    varchar,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
 });
@@ -24,12 +34,34 @@ export const projects = pgTable("projects", {
   leaderName: text("leader_name").notNull(),
   branchName: text("branch_name"),
   createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
   status: text("status").default("pending"), // pending, running, completed, failed
+  commitCount: integer("commit_count").default(0),
+  retryCount: integer("retry_count").default(0),
+  maxRetries: integer("max_retries").default(5),
   summary: jsonb("summary").$type<{
     totalFiles: number;
     totalErrors: number;
     fixedErrors: number;
+    tests?: {
+      status: string;
+      rounds: number;
+      stdout: string;
+      stderr: string;
+    };
   }>(),
+  timeline: jsonb("timeline")
+    .$type<
+      Array<{
+        id: string;
+        timestamp: string;
+        attempt: number;
+        status: "pending" | "running" | "success" | "failed";
+        duration?: number;
+        error?: string;
+      }>
+    >()
+    .default(sql`'[]'::jsonb`),
 });
 
 export const bugs = pgTable("bugs", {
@@ -44,12 +76,12 @@ export const bugs = pgTable("bugs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertProjectSchema = createInsertSchema(projects).omit({ 
-  id: true, 
-  createdAt: true, 
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
   branchName: true,
   status: true,
-  summary: true 
+  summary: true,
 });
 
 export type Project = typeof projects.$inferSelect;

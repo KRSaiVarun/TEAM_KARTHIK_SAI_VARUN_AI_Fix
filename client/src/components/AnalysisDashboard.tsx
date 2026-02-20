@@ -1,5 +1,6 @@
-import { Loader } from "lucide-react";
+import { ExternalLink, Loader } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -27,13 +28,13 @@ interface Project {
 }
 
 export function AnalysisDashboard() {
+  const [, setLocation] = useLocation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [repoUrl, setRepoUrl] = useState("");
   const [teamName, setTeamName] = useState("");
   const [leaderName, setLeaderName] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // Fetch projects list
   const fetchProjects = useCallback(async () => {
@@ -76,11 +77,12 @@ export function AnalysisDashboard() {
 
       if (response.ok) {
         const newProject = await response.json();
-        setSelectedProject(newProject);
         setRepoUrl("");
         setTeamName("");
         setLeaderName("");
         await fetchProjects();
+        // Navigate to project details page
+        setLocation(`/project/${newProject.id}`);
       } else {
         const error = await response.json();
         alert(`Failed to create project: ${error.message}`);
@@ -183,129 +185,45 @@ export function AnalysisDashboard() {
             {projects.map((project) => (
               <div
                 key={project.id}
-                onClick={() => setSelectedProject(project)}
-                className="p-4 border rounded-lg cursor-pointer hover:bg-accent transition"
+                className="p-4 border rounded-lg hover:bg-accent transition flex items-start justify-between"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">{project.repoUrl}</h3>
-                      <Badge variant={getStatusColor(project.status) as any}>
-                        {project.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Team: {project.teamName} | Leader: {project.leaderName}
-                    </p>
-                    {project.summary && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Files: {project.summary.totalFiles} | Errors:{" "}
-                        {project.summary.totalErrors} | Fixed:{" "}
-                        {project.summary.fixedErrors}
-                      </p>
-                    )}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold">{project.repoUrl}</h3>
+                    <Badge variant={getStatusColor(project.status) as any}>
+                      {project.status}
+                    </Badge>
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    Team: {project.teamName} | Leader: {project.leaderName}
+                  </p>
+                  {project.summary && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Files: {project.summary.totalFiles} | Errors:{" "}
+                      {project.summary.totalErrors} | Fixed:{" "}
+                      {project.summary.fixedErrors}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
                   {project.status === "running" && (
                     <Loader className="h-5 w-5 animate-spin text-blue-500" />
                   )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setLocation(`/project/${project.id}`)}
+                    className="gap-2"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    View Analysis
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </Card>
-
-      {/* Details Panel */}
-      {selectedProject && (
-        <Card className="p-6 bg-muted">
-          <h2 className="text-xl font-semibold mb-4">Analysis Details</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Repository</p>
-                <p className="font-mono text-sm">{selectedProject.repoUrl}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Status</p>
-                <Badge variant={getStatusColor(selectedProject.status) as any}>
-                  {selectedProject.status}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Team / Leader</p>
-                <p className="text-sm">
-                  {selectedProject.teamName} / {selectedProject.leaderName}
-                </p>
-              </div>
-              {selectedProject.branchName && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Fix Branch</p>
-                  <p className="font-mono text-sm">
-                    {selectedProject.branchName}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {selectedProject.summary && (
-              <div className="pt-4 border-t space-y-3">
-                <div>
-                  <p className="text-sm font-medium mb-2">Summary</p>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Total Files</p>
-                      <p className="text-lg font-semibold">
-                        {selectedProject.summary.totalFiles || 0}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Total Errors</p>
-                      <p className="text-lg font-semibold">
-                        {selectedProject.summary.totalErrors || 0}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Fixed Errors</p>
-                      <p className="text-lg font-semibold text-green-600">
-                        {selectedProject.summary.fixedErrors || 0}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {selectedProject.summary.tests && (
-                  <div>
-                    <p className="text-sm font-medium mb-2">Test Results</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Status:</span>
-                        <Badge
-                          variant={
-                            selectedProject.summary.tests.status === "passed"
-                              ? "default"
-                              : "destructive"
-                          }
-                        >
-                          {selectedProject.summary.tests.status}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Rounds:</span>
-                        <span>{selectedProject.summary.tests.rounds}</span>
-                      </div>
-                      {selectedProject.summary.tests.stdout && (
-                        <div className="bg-black text-green-400 p-3 rounded text-xs font-mono max-h-40 overflow-y-auto">
-                          <p>{selectedProject.summary.tests.stdout}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }

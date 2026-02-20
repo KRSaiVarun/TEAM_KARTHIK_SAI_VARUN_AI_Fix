@@ -6,6 +6,23 @@ import path from "path";
 import { z } from "zod";
 import { storage } from "./storage";
 
+/**
+ * Generate branch name using format: TEAM_NAME_LEADER_NAME_AI_Fix
+ */
+function generateBranchName(teamName: string, leaderName: string): string {
+  const cleanTeam = teamName
+    .toUpperCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Z0-9_]/g, "");
+
+  const cleanLeader = leaderName
+    .toUpperCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Z0-9_]/g, "");
+
+  return `${cleanTeam}_${cleanLeader}_AI_Fix`;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express,
@@ -13,7 +30,22 @@ export async function registerRoutes(
   app.post(api.projects.create.path, async (req, res) => {
     try {
       const input = api.projects.create.input.parse(req.body);
-      const project = await storage.createProject(input);
+
+      // Generate branch name with EXACT format
+      const branchName = generateBranchName(input.teamName, input.leaderName);
+
+      const project = await storage.createProject({
+        ...input,
+        branchName,
+      });
+
+      // Initialize timeline with first entry
+      await storage.addTimelineEntry(project.id, {
+        id: `run-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        attempt: 1,
+        status: "pending",
+      });
 
       // Trigger Python agent in background with environment variables
       const pythonProcess = spawn(
@@ -24,6 +56,7 @@ export async function registerRoutes(
           project.repoUrl,
           project.teamName,
           project.leaderName,
+          branchName,
         ],
         {
           env: {
@@ -31,6 +64,7 @@ export async function registerRoutes(
             DATABASE_URL:
               process.env.DATABASE_URL ||
               "postgresql://devuser:devpassword@127.0.0.1:15432/devdb",
+            MAX_RETRIES: "5",
           },
         },
       );

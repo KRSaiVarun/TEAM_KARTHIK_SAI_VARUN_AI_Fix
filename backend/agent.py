@@ -191,7 +191,8 @@ def clone_repo(repo_url, target_dir):
 
 def analyze_file(file_path):
     issues = []
-    with open(file_path, 'r') as f:
+    # Read files as UTF-8 to avoid platform-specific decoding errors
+    with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
         lines = f.readlines()
 
     # Simple rule-based analysis
@@ -227,14 +228,15 @@ def analyze_file(file_path):
     return issues
 
 def apply_fix(file_path, line_number, fix_content):
-    with open(file_path, 'r') as f:
+    # Read/write using UTF-8 to avoid charmap decoding issues
+    with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
         lines = f.readlines()
 
     # Line number is 1-based
     if 0 <= line_number - 1 < len(lines):
         lines[line_number - 1] = fix_content + "\n"
 
-    with open(file_path, 'w') as f:
+    with open(file_path, 'w', encoding='utf-8') as f:
         f.writelines(lines)
     return True
 
@@ -317,15 +319,77 @@ def main():
         test_stderr = ""
         test_code = 0
 
-        max_rounds = 3
+        # Respect MAX_RETRIES environment variable (default 5)
+        try:
+            max_rounds = int(os.environ.get("MAX_RETRIES", "5"))
+        except Exception:
+            max_rounds = 5
         round_no = 0
         pushed_branch = None
+        def add_timeline_entry(pid, entry):
+            try:
+                cur.execute("SELECT timeline FROM projects WHERE id = %s", (pid,))
+                row = cur.fetchone()
+                current = row[0] if row and row[0] else []
+                if not isinstance(current, list):
+                    current = []
+                current.append(entry)
+                cur.execute("UPDATE projects SET timeline = %s WHERE id = %s", (extras.Json(current), pid))
+                conn.commit()
+            except Exception as e:
+                print(f"Failed to append timeline entry for project {pid}: {e}")
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+
+        def update_last_timeline_entry(pid, attempt, updates):
+            try:
+                cur.execute("SELECT timeline FROM projects WHERE id = %s", (pid,))
+                row = cur.fetchone()
+                current = row[0] if row and row[0] else []
+                if not isinstance(current, list):
+                    current = []
+                # find last entry with matching attempt
+                for i in range(len(current)-1, -1, -1):
+                    if current[i].get('attempt') == attempt:
+                        current[i].update(updates)
+                        break
+                cur.execute("UPDATE projects SET timeline = %s WHERE id = %s", (extras.Json(current), pid))
+                conn.commit()
+            except Exception as e:
+                print(f"Failed to update timeline entry for project {pid}: {e}")
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
 
         while round_no < max_rounds:
             round_no += 1
             print(f"Running tests (round {round_no})...")
+            # Record timeline entry for this attempt
+            started_at = int(time.time() * 1000)
+            timeline_entry = {
+                "attempt": round_no,
+                "status": "running",
+                "started_at": started_at,
+                "message": "Tests running"
+            }
+            add_timeline_entry(project_id, timeline_entry)
+            # Update retryCount in projects
+            try:
+                cur.execute("UPDATE projects SET retryCount = %s WHERE id = %s", (round_no, project_id))
+                conn.commit()
+            except Exception:
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
             test_stdout, test_stderr, test_code = run_tests(workspace_dir)
             print("Test return code:", test_code)
+
+            completed_at = int(time.time() * 1000)
+            duration_ms = max(0, completed_at - started_at)
 
             if test_code == 0:
                 # Tests passed: use Json wrapper for safe JSONB insertion
@@ -347,6 +411,12 @@ def main():
                     )
                     conn.commit()
                     print(f"Updated project {project_id} status=completed with summary (passed) rounds={round_no}")
+                    # update timeline entry to passed
+                    update_last_timeline_entry(project_id, round_no, {
+                        "status": "passed",
+                        "completed_at": completed_at,
+                        "duration_ms": duration_ms
+                    })
                 except Exception as e:
                     print(f"Failed to update project summary for project {project_id}: {e}")
                     traceback.print_exc()
@@ -399,9 +469,22 @@ def main():
                         conn.rollback()
                     except Exception:
                         pass
+                # update timeline entry for this attempt as failed (we'll continue loop)
+                update_last_timeline_entry(project_id, round_no, {
+                    "status": "failed",
+                    "completed_at": int(time.time() * 1000),
+                    "duration_ms": int(time.time() * 1000) - started_at,
+                    "message": "Attempted fixes applied"
+                })
             else:
                 # No automatic fixes detected — stop trying
                 print("No additional automatic fixes found; stopping iterations")
+                update_last_timeline_entry(project_id, round_no, {
+                    "status": "no_fixes",
+                    "completed_at": int(time.time() * 1000),
+                    "duration_ms": int(time.time() * 1000) - started_at,
+                    "message": "No automatic fixes found"
+                })
                 break
 
         else:
@@ -448,6 +531,13 @@ def main():
                 cur.execute("UPDATE projects SET summary = %s WHERE id = %s", (extras.Json(summary_obj), project_id))
                 conn.commit()
                 print(f"Updated project {project_id} summary after final round (not passing)")
+                # mark last timeline entry as failed
+                update_last_timeline_entry(project_id, round_no, {
+                    "status": "failed",
+                    "completed_at": int(time.time() * 1000),
+                    "duration_ms": int(time.time() * 1000) - started_at,
+                    "message": "Final state — tests did not pass"
+                })
             except Exception as e:
                 print(f"Failed to update summary after final round for project {project_id}: {e}")
                 traceback.print_exc()

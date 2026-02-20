@@ -1,28 +1,31 @@
-import { useParams, Link } from "wouter";
-import { useProject, useProjectBugs } from "@/hooks/use-projects";
+import { CICDTimeline } from "@/components/CICDTimeline";
+import { EnhancedFixesAppliedTable } from "@/components/EnhancedFixesAppliedTable";
+import { EnhancedScoreBreakdown } from "@/components/EnhancedScoreBreakdown";
+import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { TotalTimeDisplay } from "@/components/TotalTimeDisplay";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { 
-  ArrowLeft, 
-  GitBranch, 
-  Bug as BugIcon, 
-  FileCode, 
-  Terminal, 
-  CheckCircle2, 
-  AlertCircle,
-  ExternalLink,
-  Loader2
+import { useProject, useProjectBugs } from "@/hooks/use-projects";
+import { differenceInSeconds, format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+    AlertCircle,
+    ArrowLeft,
+    Bug as BugIcon,
+    CheckCircle2,
+    FileCode,
+    GitBranch,
+    Loader2,
+    Terminal,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { format } from "date-fns";
+import { Link, useParams } from "wouter";
 
 export default function ProjectDetails() {
   const params = useParams<{ id: string }>();
   const id = parseInt(params.id || "0");
-  
+
   const { data: project, isLoading: isProjectLoading } = useProject(id);
   const { data: bugs, isLoading: isBugsLoading } = useProjectBugs(id);
 
@@ -31,7 +34,9 @@ export default function ProjectDetails() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground animate-pulse">Loading project data...</p>
+          <p className="text-muted-foreground animate-pulse">
+            Loading project data...
+          </p>
         </div>
       </div>
     );
@@ -39,9 +44,18 @@ export default function ProjectDetails() {
 
   const bugStats = {
     total: bugs?.length || 0,
-    fixed: bugs?.filter(b => b.status === 'fixed').length || 0,
-    pending: bugs?.filter(b => b.status === 'pending').length || 0,
+    fixed: bugs?.filter((b) => b.status === "fixed").length || 0,
+    pending: bugs?.filter((b) => b.status === "pending").length || 0,
   };
+
+  // Calculate completion time in seconds
+  const completionTime =
+    project?.completedAt && project?.createdAt
+      ? differenceInSeconds(
+          new Date(project.completedAt),
+          new Date(project.createdAt),
+        )
+      : 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
@@ -56,28 +70,33 @@ export default function ProjectDetails() {
             </Link>
             <div className="h-6 w-px bg-border mx-2" />
             <div className="flex flex-col">
-              <h1 className="text-lg font-bold leading-none">{project.teamName} / {project.leaderName}</h1>
-              <span className="text-xs text-muted-foreground font-mono mt-1">{project.repoUrl}</span>
+              <h1 className="text-lg font-bold leading-none">
+                {project.teamName} / {project.leaderName}
+              </h1>
+              <span className="text-xs text-muted-foreground font-mono mt-1">
+                {project.repoUrl}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-3">
-             {project.status === 'running' && (
-               <span className="text-xs text-blue-400 font-mono animate-pulse">
-                 Agent Active...
-               </span>
-             )}
-            <StatusBadge status={project.status || 'pending'} />
+            {project.status === "running" && (
+              <span className="text-xs text-blue-400 font-mono animate-pulse">
+                Agent Active...
+              </span>
+            )}
+            <StatusBadge status={project.status || "pending"} />
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
         {/* Top Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Branch Created</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Branch Created
+              </CardTitle>
               <GitBranch className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -86,10 +105,12 @@ export default function ProjectDetails() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Issues</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Issues
+              </CardTitle>
               <AlertCircle className="h-4 w-4 text-red-400" />
             </CardHeader>
             <CardContent>
@@ -103,28 +124,70 @@ export default function ProjectDetails() {
               <CheckCircle2 className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-400">{bugStats.fixed}</div>
+              <div className="text-2xl font-bold text-green-400">
+                {bugStats.fixed}
+              </div>
             </CardContent>
           </Card>
 
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Success Rate
+              </CardTitle>
               <BugIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {bugStats.total > 0 
-                  ? Math.round((bugStats.fixed / bugStats.total) * 100) 
-                  : 0}%
+                {bugStats.total > 0
+                  ? Math.round((bugStats.fixed / bugStats.total) * 100)
+                  : 0}
+                %
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Loading Indicator */}
+        <LoadingIndicator isLoading={project.status === "running"} />
+
+        {/* Total Time Display */}
+        {project.createdAt && (
+          <TotalTimeDisplay
+            startTime={project.createdAt}
+            endTime={project.completedAt}
+            isRunning={project.status === "running"}
+          />
+        )}
+
+        {/* CI/CD Timeline */}
+        {(project.timeline as any)?.length > 0 && (
+          <CICDTimeline
+            timeline={(project.timeline as any) || []}
+            maxRetries={project.maxRetries || 5}
+            isLoading={project.status === "running"}
+          />
+        )}
+
+        {/* Enhanced Score Breakdown - Show for both running and completed */}
+        {(project.status === "completed" || project.status === "running") && (
+          <EnhancedScoreBreakdown
+            baseScore={100}
+            completionTime={completionTime}
+            commitCount={project.commitCount || 0}
+            totalBugsDetected={bugStats.total}
+            totalBugsFixed={bugStats.fixed}
+          />
+        )}
+
+        {/* Enhanced Fixes Applied Table with exact formatting */}
+        <EnhancedFixesAppliedTable
+          bugs={bugs || []}
+          isLoading={isBugsLoading}
+        />
+
         {/* Main Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Left: Bug List */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
@@ -133,13 +196,16 @@ export default function ProjectDetails() {
                 Detected Issues
               </h2>
             </div>
-            
+
             {isBugsLoading ? (
-               <div className="space-y-4">
-                 {[1,2,3].map(i => (
-                   <div key={i} className="h-24 bg-card/50 animate-pulse rounded-xl" />
-                 ))}
-               </div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-24 bg-card/50 animate-pulse rounded-xl"
+                  />
+                ))}
+              </div>
             ) : (
               <div className="space-y-4">
                 <AnimatePresence>
@@ -166,29 +232,34 @@ export default function ProjectDetails() {
                               <p className="text-sm text-foreground/80 font-mono bg-black/20 p-2 rounded border border-white/5">
                                 {bug.errorMessage}
                               </p>
-                              
+
                               {bug.fixApplied && (
                                 <div className="mt-3 pt-3 border-t border-white/5">
                                   <p className="text-xs text-green-400 flex items-center gap-1.5">
                                     <CheckCircle2 className="w-3 h-3" />
-                                    Fix Applied: <span className="font-mono text-foreground/70">{bug.fixApplied}</span>
+                                    Fix Applied:{" "}
+                                    <span className="font-mono text-foreground/70">
+                                      {bug.fixApplied}
+                                    </span>
                                   </p>
                                 </div>
                               )}
                             </div>
-                            <StatusBadge status={bug.status || 'pending'} />
+                            <StatusBadge status={bug.status || "pending"} />
                           </div>
                         </CardContent>
                       </Card>
                     </motion.div>
                   ))}
                 </AnimatePresence>
-                
+
                 {bugs?.length === 0 && (
                   <div className="text-center py-20 bg-card/30 rounded-2xl border border-dashed border-border">
                     <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4 opacity-50" />
                     <h3 className="text-lg font-medium">All Clear</h3>
-                    <p className="text-muted-foreground">No bugs detected in this repository.</p>
+                    <p className="text-muted-foreground">
+                      No bugs detected in this repository.
+                    </p>
                   </div>
                 )}
               </div>
@@ -201,7 +272,7 @@ export default function ProjectDetails() {
               <Terminal className="w-5 h-5 text-primary" />
               Agent Activity
             </h2>
-            
+
             <Card className="bg-black/40 border-border h-[600px] flex flex-col font-mono text-xs">
               <CardHeader className="py-3 px-4 border-b border-white/5 bg-white/5">
                 <div className="flex items-center gap-2">
@@ -210,66 +281,91 @@ export default function ProjectDetails() {
                     <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50" />
                     <div className="w-2.5 h-2.5 rounded-full bg-green-500/50" />
                   </div>
-                  <span className="ml-2 text-muted-foreground">agent_logs.txt</span>
+                  <span className="ml-2 text-muted-foreground">
+                    agent_logs.txt
+                  </span>
                 </div>
               </CardHeader>
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-2">
                   <div className="text-green-400/80">
-                    <span className="opacity-50">[{format(new Date(project.createdAt || new Date()), 'HH:mm:ss')}]</span> 
-                    {' '}System initialized
+                    <span className="opacity-50">
+                      [
+                      {format(
+                        new Date(project.createdAt || new Date()),
+                        "HH:mm:ss",
+                      )}
+                      ]
+                    </span>{" "}
+                    System initialized
                   </div>
-                  
-                  {project.status === 'running' && (
-                     <>
-                        <div className="text-blue-400/80">
-                            <span className="opacity-50">[{format(new Date(), 'HH:mm:ss')}]</span>
-                            {' '}Cloning repository {project.repoUrl}...
-                        </div>
-                        <div className="text-blue-400/80">
-                             <span className="opacity-50">[{format(new Date(), 'HH:mm:ss')}]</span>
-                             {' '}Analyzing project structure...
-                        </div>
-                        <div className="text-yellow-400/80 animate-pulse">
-                             <span className="opacity-50">[{format(new Date(), 'HH:mm:ss')}]</span>
-                             {' '}Running test suite...
-                        </div>
-                     </>
+
+                  {project.status === "running" && (
+                    <>
+                      <div className="text-blue-400/80">
+                        <span className="opacity-50">
+                          [{format(new Date(), "HH:mm:ss")}]
+                        </span>{" "}
+                        Cloning repository {project.repoUrl}...
+                      </div>
+                      <div className="text-blue-400/80">
+                        <span className="opacity-50">
+                          [{format(new Date(), "HH:mm:ss")}]
+                        </span>{" "}
+                        Analyzing project structure...
+                      </div>
+                      <div className="text-yellow-400/80 animate-pulse">
+                        <span className="opacity-50">
+                          [{format(new Date(), "HH:mm:ss")}]
+                        </span>{" "}
+                        Running test suite...
+                      </div>
+                    </>
                   )}
 
                   {bugs?.map((bug) => (
                     <div key={bug.id} className="text-red-400/80">
-                      <span className="opacity-50">[{format(new Date(bug.createdAt || new Date()), 'HH:mm:ss')}]</span>
-                      {' '}Detected {bug.bugType} in {bug.filePath.split('/').pop()}
+                      <span className="opacity-50">
+                        [
+                        {format(
+                          new Date(bug.createdAt || new Date()),
+                          "HH:mm:ss",
+                        )}
+                        ]
+                      </span>{" "}
+                      Detected {bug.bugType} in {bug.filePath.split("/").pop()}
                     </div>
                   ))}
 
-                  {project.status === 'completed' && (
+                  {project.status === "completed" && (
                     <div className="text-green-400/80 border-t border-white/10 pt-2 mt-2">
-                        <span className="opacity-50">[{format(new Date(), 'HH:mm:ss')}]</span>
-                        {' '}Analysis complete. Branch ready.
+                      <span className="opacity-50">
+                        [{format(new Date(), "HH:mm:ss")}]
+                      </span>{" "}
+                      Analysis complete. Branch ready.
                     </div>
                   )}
-                  
-                  {project.status === 'failed' && (
+
+                  {project.status === "failed" && (
                     <div className="text-red-500 border-t border-white/10 pt-2 mt-2">
-                        <span className="opacity-50">[{format(new Date(), 'HH:mm:ss')}]</span>
-                        {' '}Analysis failed. Check logs above.
+                      <span className="opacity-50">
+                        [{format(new Date(), "HH:mm:ss")}]
+                      </span>{" "}
+                      Analysis failed. Check logs above.
                     </div>
                   )}
                 </div>
               </ScrollArea>
-              
-              {project.status === 'running' && (
-                 <div className="p-2 border-t border-white/5 text-center">
-                    <span className="inline-flex items-center gap-2 text-muted-foreground animate-pulse">
-                       <Loader2 className="w-3 h-3 animate-spin" /> Processing...
-                    </span>
-                 </div>
+
+              {project.status === "running" && (
+                <div className="p-2 border-t border-white/5 text-center">
+                  <span className="inline-flex items-center gap-2 text-muted-foreground animate-pulse">
+                    <Loader2 className="w-3 h-3 animate-spin" /> Processing...
+                  </span>
+                </div>
               )}
             </Card>
           </div>
-          
         </div>
       </main>
     </div>
