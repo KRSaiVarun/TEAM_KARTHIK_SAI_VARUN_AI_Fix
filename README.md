@@ -16,6 +16,19 @@
 
 </div>
 
+
+# 🤖 AI Code Fix Agent
+
+An AI-powered tool that detects and fixes code issues automatically.
+
+## 🚀 Live Deployment
+👉 https://code-fix-agent--srchmydj.replit.app/
+
+## 🛠 Tech Stack
+- Node.js
+- Express
+- OpenAI API
+- HTML/CSS
 ---
 
 ## 📸 Dashboard Preview
